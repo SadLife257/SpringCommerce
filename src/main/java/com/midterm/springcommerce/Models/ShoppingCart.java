@@ -29,7 +29,7 @@ public class ShoppingCart {
 	@GeneratedValue(generator = "cart-generator")
 	@GenericGenerator(name = "cart-generator", 
 				    parameters = @Parameter(name = "prefix", value = "SC"), 
-				    strategy = "Utilities.IdGeneratorUtils")
+				    strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
 	private String id;
 	private double total;
 	@OneToMany(mappedBy="cart")

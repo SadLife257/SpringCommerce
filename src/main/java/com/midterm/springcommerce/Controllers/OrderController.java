@@ -47,8 +47,9 @@ public class OrderController {
     public ResponseEntity<Order> updateOrder(@PathVariable String id, @RequestBody Order p) {
         Optional<Order> optional = service.findById(id);
         return optional.map(e -> {
-            e.setId(e.getId());
-            return new ResponseEntity<>(service.save(e), HttpStatus.OK);
+            p.setId(e.getId());
+            p.setCreatedAt(e.getCreatedAt());
+            return new ResponseEntity<>(service.save(p), HttpStatus.OK);
         }).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 	//Delete

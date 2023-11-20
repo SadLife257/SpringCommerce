@@ -1,6 +1,5 @@
 package com.midterm.springcommerce.Models;
 
-import java.io.Serializable;
 import java.util.Calendar;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,8 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.midterm.springcommerce.Utilities.CartProductKey;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -43,6 +40,15 @@ public class CartProduct {
 	
 	private int quantity;
 	
+	
+	
+	public CartProduct(CartProductKey id, Product product, ShoppingCart cart, int quantity) {
+		super();
+		this.id = id;
+		this.product = product;
+		this.cart = cart;
+		this.quantity = quantity;
+	}
 	@CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
 	private Calendar createdAt;

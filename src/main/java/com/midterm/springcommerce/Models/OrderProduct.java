@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="order_product")
+@Table(name="deliver_product")
 public class OrderProduct {
 	@EmbeddedId
 	private OrderProductKey id;
@@ -38,8 +38,8 @@ public class OrderProduct {
     private Product product;
 
     @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "order_id")
+    @MapsId("deliverId")
+    @JoinColumn(name = "deliver_id")
     private Order order;
 	
 	private int quantity;

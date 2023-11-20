@@ -29,7 +29,7 @@ public class Product {
 	@GeneratedValue(generator = "product-generator")
 	@GenericGenerator(name = "product-generator", 
 				    parameters = @Parameter(name = "prefix", value = "PD"), 
-				    strategy = "Utilities.IdGeneratorUtils")
+				    strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
 	private String id;
 	private String name;
 	private double price;

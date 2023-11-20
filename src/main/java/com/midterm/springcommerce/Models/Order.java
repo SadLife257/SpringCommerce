@@ -23,13 +23,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="order")
+@Table(name="deliver")
 public class Order {
 	@Id
-	@GeneratedValue(generator = "order-generator")
-	@GenericGenerator(name = "order-generator", 
-				    parameters = @Parameter(name = "prefix", value = "OD"), 
-				    strategy = "Utilities.IdGeneratorUtils")
+	@GeneratedValue(generator = "deliver-generator")
+	@GenericGenerator(name = "deliver-generator", 
+				    parameters = @Parameter(name = "prefix", value = "DV"), 
+				    strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
 	private String id;
 	private double total;
 	private String state;
