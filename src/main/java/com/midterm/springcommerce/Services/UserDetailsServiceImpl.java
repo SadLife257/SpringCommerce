@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.midterm.springcommerce.Models.User;
 import com.midterm.springcommerce.Repositories.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -16,6 +18,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	UserRepository repo;
 
 	@Override
+	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 		User user = repo.findByUsername(username)

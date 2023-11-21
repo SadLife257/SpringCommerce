@@ -33,8 +33,6 @@ public class Order {
 	private String id;
 	private double total;
 	private String state;
-	@OneToMany(mappedBy="order")
-	private Set<OrderProduct> order_product;
 	@CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
 	private Calendar createdAt;

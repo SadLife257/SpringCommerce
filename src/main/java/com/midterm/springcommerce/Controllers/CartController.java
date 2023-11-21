@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,13 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.midterm.springcommerce.Models.CartProduct;
 import com.midterm.springcommerce.Models.CartProductResponse;
+import com.midterm.springcommerce.Models.Product;
 import com.midterm.springcommerce.Models.ShoppingCart;
+import com.midterm.springcommerce.Models.User;
 import com.midterm.springcommerce.Services.CartProductService;
 import com.midterm.springcommerce.Services.ProductService;
 import com.midterm.springcommerce.Services.ShoppingCartService;
+import com.midterm.springcommerce.Services.UserDetailsImpl;
+import com.midterm.springcommerce.Services.UserService;
 import com.midterm.springcommerce.Utilities.CartProductKey;
 import com.midterm.springcommerce.Utilities.Constants;
-import com.midterm.springcommerce.Utilities.Payloads.Requests.CartProductRequest;
 
 @RestController
 @RequestMapping("/cart")
@@ -35,25 +40,40 @@ public class CartController {
 	@Autowired
 	private CartProductService cartProductService;
 	
+	@Autowired
+	private ProductService productService;
+	
+	@Autowired
+	private UserService userService;
+	
 	//Create
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<ShoppingCart> createCart(@RequestBody ShoppingCart p){
 		return new ResponseEntity<>(service.save(p), HttpStatus.OK);
 	}
 	//Read
 	@GetMapping("/products")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<CartProductResponse> readAllCartProduct(
 			@RequestParam(value = "pageNo", defaultValue = Constants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
 			@RequestParam(value = "pageSize", defaultValue = Constants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = Constants.DEFAULT_SORT_BY, required = false) String sortBy,
 			@RequestParam(value = "sortDir", defaultValue = Constants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		return new ResponseEntity<>(cartProductService.findAll(pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);
+		UserDetailsImpl userDetail = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+				.getPrincipal();
+		Optional<User> user = userService.findById(userDetail.getId());
+		return user.map(e -> {
+			return new ResponseEntity<>(cartProductService.findAll(e.getCart(), pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);
+		}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<Iterable<ShoppingCart>> readAllCart() {
         return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ShoppingCart> readCartById(@PathVariable String id) {
         Optional<ShoppingCart> optional = service.findById(id);
         return optional.map(e -> new ResponseEntity<>(e, HttpStatus.OK))
@@ -61,14 +81,21 @@ public class CartController {
 	}
 	//Update
 	@PutMapping("/products/{id}")
-	public ResponseEntity<CartProduct> updateCartProduct(@PathVariable CartProductKey id, @RequestBody CartProductRequest p) {
-		Optional<CartProduct> optional = cartProductService.findById(id);
-		return optional.map(e -> {
-			e.setQuantity(p.getQuantity());
-			return new ResponseEntity<>(cartProductService.save(e), HttpStatus.OK);
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+	public ResponseEntity<CartProduct> updateCartProduct(
+			@PathVariable String id, 
+			@RequestParam(value = "quantity", defaultValue = Constants.DEFAULT_CART_PRODUCT_QUANTITY, required = false) int quantity) {
+		Optional<Product> productOp = productService.findById(id);
+		return productOp.map(product -> {
+			Optional<CartProduct> optional = cartProductService.findById(product);
+			return optional.map(e -> {
+				e.setQuantity(quantity);
+				return new ResponseEntity<>(cartProductService.save(e), HttpStatus.OK);
+			}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 		}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ShoppingCart> updateCart(@PathVariable String id, @RequestBody ShoppingCart p) {
         Optional<ShoppingCart> optional = service.findById(id);
         return optional.map(e -> {
@@ -79,14 +106,19 @@ public class CartController {
 	}
 	//Delete
 	@DeleteMapping("/products/{id}")
-	public ResponseEntity<CartProduct> deleteCartProduct(@PathVariable CartProductKey id) {
-		Optional<CartProduct> optional = cartProductService.findById(id);
-		return optional.map(e -> {
-			cartProductService.remove(id);
-			return new ResponseEntity<>(e, HttpStatus.OK);
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+	public ResponseEntity<CartProduct> deleteCartProduct(@PathVariable String id) {
+		Optional<Product> productOp = productService.findById(id);
+		return productOp.map(product -> {
+			Optional<CartProduct> optional = cartProductService.findById(product);
+			return optional.map(e -> {
+				cartProductService.remove(e);
+				return new ResponseEntity<>(e, HttpStatus.OK);
+			}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 		}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ShoppingCart> deleteCart(@PathVariable String id) {
         Optional<ShoppingCart> optional = service.findById(id);
         return optional.map(e -> {

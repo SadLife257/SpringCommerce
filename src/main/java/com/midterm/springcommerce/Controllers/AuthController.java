@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -26,11 +28,14 @@ import com.midterm.springcommerce.Models.ShoppingCart;
 import com.midterm.springcommerce.Models.User;
 import com.midterm.springcommerce.Repositories.RoleRepository;
 import com.midterm.springcommerce.Repositories.UserRepository;
+import com.midterm.springcommerce.Securities.AuthEntryPointJwt;
 import com.midterm.springcommerce.Securities.JwtUtils;
+import com.midterm.springcommerce.Services.ShoppingCartService;
 import com.midterm.springcommerce.Services.UserDetailsImpl;
 import com.midterm.springcommerce.Utilities.ERole;
 import com.midterm.springcommerce.Utilities.Payloads.Requests.LoginRequest;
 import com.midterm.springcommerce.Utilities.Payloads.Requests.SignupRequest;
+import com.midterm.springcommerce.Utilities.Payloads.Responses.JwtResponse;
 import com.midterm.springcommerce.Utilities.Payloads.Responses.MessageResponse;
 import com.midterm.springcommerce.Utilities.Payloads.Responses.UserInfoResponse;
 
@@ -48,12 +53,17 @@ public class AuthController {
 
 	@Autowired
 	RoleRepository roleRepo;
+	
+	@Autowired
+	ShoppingCartService cartService;
 
 	@Autowired
 	PasswordEncoder encoder;
 
 	@Autowired
 	JwtUtils jwtUtils;
+	
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -65,13 +75,16 @@ public class AuthController {
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-		ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+		String jwt = jwtUtils.generateJwtToken(authentication);
 
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString()).body(
-				new UserInfoResponse(userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+		return ResponseEntity.ok(new JwtResponse(jwt, 
+                userDetails.getId(), 
+                userDetails.getUsername(), 
+                userDetails.getEmail(), 
+                roles));
 	}
 
 	@PostMapping("/signup")
@@ -79,15 +92,12 @@ public class AuthController {
 		if (userRepo.existsByUsername(signUpRequest.getUsername())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
 		}
-
 		if (userRepo.existsByEmail(signUpRequest.getEmail())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
 		}
-
 		// Create new user's account
-		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+		User user = new User(signUpRequest.getFirstname(), signUpRequest.getLastname(), signUpRequest.getUsername(), signUpRequest.getEmail(),
 				encoder.encode(signUpRequest.getPassword()));
-
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Role> roles = new HashSet();
 
@@ -111,11 +121,9 @@ public class AuthController {
 				}
 			});
 		}
-
 		user.setRoles(roles);
-		user.setCart(new ShoppingCart());
+		user.setCart(cartService.save(new ShoppingCart()));
 		userRepo.save(user);
-
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
 

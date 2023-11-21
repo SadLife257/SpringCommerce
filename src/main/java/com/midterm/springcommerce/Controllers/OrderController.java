@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,15 +29,18 @@ public class OrderController {
 	
 	//Create
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<Order> createOrder(@RequestBody Order p){
 		return new ResponseEntity<>(service.save(p), HttpStatus.OK);
 	}
 	//Read
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
 	public ResponseEntity<Iterable<Order>> readAllOrder() {
         return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Order> readOrderById(@PathVariable String id) {
         Optional<Order> optional = service.findById(id);
         return optional.map(e -> new ResponseEntity<>(e, HttpStatus.OK))
@@ -44,6 +48,7 @@ public class OrderController {
 	}
 	//Update
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Order> updateOrder(@PathVariable String id, @RequestBody Order p) {
         Optional<Order> optional = service.findById(id);
         return optional.map(e -> {
@@ -54,6 +59,7 @@ public class OrderController {
 	}
 	//Delete
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Order> deleteOrder(@PathVariable String id) {
         Optional<Order> optional = service.findById(id);
         return optional.map(e -> {

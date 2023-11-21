@@ -27,32 +27,19 @@ import lombok.NoArgsConstructor;
 public class CartProduct {
 	@EmbeddedId
 	private CartProductKey id;
-	
-	@ManyToOne
-    @MapsId("productId")
-    @JoinColumn(name = "product_id")
-    private Product product;
 
-    @ManyToOne
-    @MapsId("cartId")
-    @JoinColumn(name = "cart_id")
-    private ShoppingCart cart;
-	
 	private int quantity;
 	
-	
-	
-	public CartProduct(CartProductKey id, Product product, ShoppingCart cart, int quantity) {
-		super();
-		this.id = id;
-		this.product = product;
-		this.cart = cart;
-		this.quantity = quantity;
-	}
 	@CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
 	private Calendar createdAt;
 	@UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
 	private Calendar modifiedAt;
+	
+	public CartProduct(CartProductKey id, int quantity) {
+		super();
+		this.id = id;
+		this.quantity = quantity;
+	}
 }

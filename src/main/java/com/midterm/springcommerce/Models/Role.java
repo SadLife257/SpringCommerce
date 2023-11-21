@@ -29,7 +29,7 @@ public class Role {
 	@GenericGenerator(name = "role-generator", 
 				    parameters = @Parameter(name = "prefix", value = "RL"), 
 				    strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
-	private Integer id;
+	private String id;
 
 	@Enumerated(EnumType.STRING)
 	@Column(length = 20)

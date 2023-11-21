@@ -36,10 +36,6 @@ public class Product {
 	private String category;
 	private String brand;
 	private String color;
-	@OneToMany(mappedBy="product")
-	private Set<CartProduct> cart_product;
-	@OneToMany(mappedBy="product")
-	private Set<OrderProduct> order_product;
 	@CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
 	private Calendar createdAt;

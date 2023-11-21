@@ -13,6 +13,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
@@ -36,15 +37,17 @@ import lombok.NoArgsConstructor;
 @Table(name = "user", uniqueConstraints = { @UniqueConstraint(columnNames = "username"),
 		@UniqueConstraint(columnNames = "email") })
 public class User {
-	public User(String username2, String email2, String encode) {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Id
 	@GeneratedValue(generator = "user-generator")
-	@GenericGenerator(name = "user-generator", parameters = @Parameter(name = "prefix", value = "AC"), strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
+	@GenericGenerator(name = "user-generator", 
+					parameters = @Parameter(name = "prefix", value = "AC"), 
+					strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
 	private String id;
+	@NotBlank
+    @Size(max = 50)
 	private String firstname;
+	@NotBlank
+    @Size(max = 50)
 	private String lastname;
 	@NotBlank
 	@Size(max = 20)
@@ -71,4 +74,23 @@ public class User {
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar modifiedAt;
+	public User(@NotBlank @Size(max = 20) String username, @NotBlank @Size(max = 50) @Email String email,
+			@NotBlank @Size(max = 120) String password) {
+		super();
+		this.username = username;
+		this.email = email;
+		this.password = password;
+	}
+	public User(@NotBlank @Size(max = 50) String firstname, @NotBlank @Size(max = 50) String lastname,
+			@NotBlank @Size(max = 20) String username, @NotBlank @Size(max = 50) @Email String email,
+			@NotBlank @Size(max = 120) String password) {
+		super();
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.username = username;
+		this.email = email;
+		this.password = password;
+	}
+	
+	
 }

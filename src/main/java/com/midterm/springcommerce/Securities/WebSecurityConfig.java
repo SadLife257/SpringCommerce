@@ -56,7 +56,7 @@ public class WebSecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/**").permitAll()
+                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**", "/error").permitAll()
                         .anyRequest().authenticated());
 
 		http.headers(headers -> headers.frameOptions(frameOption -> frameOption.sameOrigin()));

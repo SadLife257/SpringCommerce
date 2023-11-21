@@ -32,8 +32,6 @@ public class ShoppingCart {
 				    strategy = "com.midterm.springcommerce.Utilities.IdGenerator")
 	private String id;
 	private double total;
-	@OneToMany(mappedBy="cart")
-	private Set<CartProduct> cart_product;
 	@CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
 	private Calendar createdAt;
