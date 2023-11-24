@@ -112,8 +112,11 @@ public class CartController {
 		return productOp.map(product -> {
 			Optional<CartProduct> optional = cartProductService.findById(product);
 			return optional.map(e -> {
-				cartProductService.remove(e);
-				return new ResponseEntity<>(e, HttpStatus.OK);
+				return optional.map(cp ->{
+					cp.getId().getCart().setTotal(cp.getId().getCart().getTotal() - cp.getQuantity() * product.getPrice());
+					cartProductService.remove(e);
+					return new ResponseEntity<>(e, HttpStatus.OK);
+				}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 			}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 		}).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}

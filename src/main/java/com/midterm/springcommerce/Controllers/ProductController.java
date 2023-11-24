@@ -110,6 +110,8 @@ public class ProductController {
 		return user.map(e -> {
 			Optional<Product> optional = service.findById(id);
 			return optional.map(p -> {
+				e.getCart().setTotal(e.getCart().getTotal() + quantity * p.getPrice());
+				cartService.save(e.getCart());
 				CartProductKey key = new CartProductKey(p, e.getCart());
 				CartProduct cartProduct = cartProductService.save(key, quantity);
 				return new ResponseEntity<>(cartProduct, HttpStatus.OK);
